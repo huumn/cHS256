@@ -1,2 +1,1 @@
-hmacsha256
-.tags
+*.sc linguist-language=Scheme
