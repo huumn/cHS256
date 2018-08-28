@@ -1,1 +1,15 @@
-*.sc linguist-language=Scheme
+*.ss~
+*.ss#*
+.#*.ss
+
+*.scm~
+*.scm#*
+.#*.scm
+
+*.sc~
+*.sc#*
+.#*.sc
+
+*.c~
+*.c#*
+.#*.c
