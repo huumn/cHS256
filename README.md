@@ -2,5 +2,5 @@
 ```
 raven install chs256
 
-(hs256 "body" "secret")
+(hs256 "body" "secret")  => string
 ```
