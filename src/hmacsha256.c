@@ -35,31 +35,31 @@ static void normalize_key( uint8_t * const key, const char * const input_key ) {
 	}
 }
 
-int main( int argc, char ** argv ) {
-	if( argc != 2 )
-		usage( argv[ 0 ] );
+char *hs256( char *data, char *key ) {
 
-	uint8_t key[ BLOCK_LENGTH ];
-	normalize_key( key, argv[ 1 ] );
+
+	uint8_t _key[ BLOCK_LENGTH ];
+	normalize_key( _key, key );
 
 	struct sha256 inner_s;
 	sha256_init( &inner_s );
 
+	int offset = 0;
+	char hash[SHA256_DIGEST_LENGTH + 1];
+	char *result = hash;
+
 	uint8_t inner_key[ BLOCK_LENGTH ];
 	uint8_t outer_key[ BLOCK_LENGTH ];
 	for( size_t i = 0; i < BLOCK_LENGTH; i++ ) {
-		inner_key[ i ] = key[ i ] ^ INNER_PADDING;
-		outer_key[ i ] = key[ i ] ^ OUTER_PADDING;
+		inner_key[ i ] = _key[ i ] ^ INNER_PADDING;
+		outer_key[ i ] = _key[ i ] ^ OUTER_PADDING;
 	}
 
 	sha256_update( &inner_s, inner_key, BLOCK_LENGTH );
 
-	uint8_t buf[ BUFSIZ ];
-	size_t n;
-	while( ( n = fread( buf, 1, sizeof( buf ), stdin ) ) > 0 )
-		sha256_update( &inner_s, buf, n );
-	if( ferror( stdin ) )
-		err( 1, "error reading stdin" );
+	
+	size_t n = strlen(data);
+	sha256_update( &inner_s, data, n );
 
 	uint8_t inner_hash[ SHA256_DIGEST_LENGTH ];
 	sha256_sum( &inner_s, inner_hash );
@@ -71,9 +71,13 @@ int main( int argc, char ** argv ) {
 
 	uint8_t hmac[ SHA256_DIGEST_LENGTH ];
 	sha256_sum( &outer_s, hmac );
-	for( size_t i = 0; i < SHA256_DIGEST_LENGTH; i++ )
-		printf( "%02x", hmac[ i ] );
-	putchar( '\n' );
 
-	return 0;
+	for( size_t i = 0; i < SHA256_DIGEST_LENGTH; i++ )
+	{
+		offset += sprintf( hash+offset, "%02x%s", hmac[ i ], "" );
+	}
+
+	hash[SHA256_DIGEST_LENGTH] = '\0';
+
+	return result;
 }
